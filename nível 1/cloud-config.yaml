@@ -1,1 +1,33 @@
 #cloud-config
+
+# Atualiza a lista de pacotes disponíveis antes das instalações.
+package_update: true
+
+# Define os programas que serão instalados na máquina virtual.
+packages:
+  - nginx  # Servidor web responsável por disponibilizar o site.
+
+# Cria arquivos e define suas propriedades durante a inicialização.
+write_files:
+  - path: /var/www/html/index.html  # Caminho padrão da página inicial do Nginx.
+
+    owner: www-data:www-data  # Define o usuário e o grupo proprietários do arquivo.
+
+    permissions: '0644'  # Proprietário lê e escreve; grupo e outros apenas leem.
+
+    content: |
+      <!DOCTYPE html>
+      <html lang="pt-BR">
+      <head>
+          <meta charset="UTF-8"> <!-- Permite exibir corretamente caracteres especiais. -->
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Laboratório - Cloud-init</title> <!-- Título exibido na aba do navegador. -->
+      </head>
+      <body>
+          <h1>Bem-vindo!</h1> <!-- Título principal exibido na página. -->
+      </body>
+      </html>
+
+# Executa comandos no sistema após as etapas anteriores do Cloud-init.
+runcmd:
+  - systemctl restart nginx  # Reinicia o Nginx para garantir que o serviço esteja em execução.
