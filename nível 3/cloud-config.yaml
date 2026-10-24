@@ -1,0 +1,55 @@
+
+#cloud-config
+
+# 1. Atualiza a lista de pacotes disponíveis para instalação.
+package_update: true
+
+# 2. Instala as ferramentas necessárias para o laboratório.
+packages:
+  - docker.io  # Permite criar e executar contêineres.
+  - git        # Permite controlar versões de arquivos e projetos.
+
+# 3. Cria o usuário aluno e define suas permissões.
+users:
+  - default  # Mantém a configuração padrão do usuário da imagem.
+  - name: aluno
+    groups: [sudo, docker]  # Permite usar o sudo e acessar o Docker.
+    shell: /bin/bash       # Define o Bash como terminal padrão.
+    sudo: 'ALL=(ALL) NOPASSWD:ALL'  # Permite usar sudo sem solicitar senha.
+    lock_passwd: true      # Impede autenticação por senha para esse usuário.
+
+# 4. Cria um arquivo de boas-vindas no diretório do aluno.
+write_files:
+  - path: /home/aluno/bem-vindo.txt
+    owner: root:root  # Define root como proprietário inicial do arquivo.
+    permissions: '0644'  # Proprietário lê e escreve; demais usuários leem.
+    content: |
+      Bem-vindo ao Laboratório Cloud-init!
+
+      Seu ambiente de desenvolvimento foi configurado automaticamente.
+
+      Ferramentas instaladas:
+      - Docker: execução de contêineres
+      - Git: controle de versão
+      - Grafana: painel de monitoramento
+
+      O Grafana está disponível na porta 3000.
+
+      Para verificar o Docker, execute:
+      docker ps
+
+      Para verificar o Git, execute:
+      git --version
+
+# 5. Executa comandos após as etapas anteriores do Cloud-init.
+runcmd:
+  # Transfere ao aluno a propriedade dos arquivos do seu diretório pessoal.
+  - chown -R aluno:aluno /home/aluno
+
+  # Habilita o Docker na inicialização e inicia o serviço imediatamente.
+  - systemctl enable --now docker
+
+  # Inicia o Grafana em segundo plano e publica sua porta 3000.
+  # --restart unless-stopped permite reiniciar o contêiner automaticamente,
+  # exceto quando ele tiver sido parado manualmente.
+  - docker run -d --name grafana --restart unless-stopped -p 3000:3000 grafana/grafana:latest
