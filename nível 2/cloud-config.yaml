@@ -1,0 +1,17 @@
+#cloud-config
+
+# Atualiza a lista de pacotes disponíveis antes da instalação.
+package_update: true
+
+# Define os pacotes que serão instalados na máquina virtual.
+packages:
+  - docker.io  # Instala o Docker, utilizado para executar contêineres.
+
+# Executa comandos durante a inicialização da máquina.
+runcmd:
+  # Habilita o Docker para iniciar automaticamente com o sistema
+  # e inicia o serviço imediatamente.
+  - [systemctl, enable, --now, docker]
+
+  # Cria e executa um contêiner com um servidor web de demonstração.
+  - [docker, run, -d, --name, nginx-hello, -p, "8080:80", nginxdemos/hello]
